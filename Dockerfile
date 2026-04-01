@@ -1,5 +1,5 @@
 # 빌드 스테이지
-FROM gradle:8.5-jdk17 AS builder
+FROM eclipse-temurin:17-jdk-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN chmod +x gradlew && ./gradlew bootJar --no-daemon
