@@ -61,7 +61,7 @@ jobs:
         if: github.event_name == 'push'
         run: |
           IMAGE_TAG="sha-$(echo ${{ github.sha }} | cut -c1-7)"
-          git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository_owner }}/gamepulse-infra.git
+          git clone https://x-access-token:${{ secrets.INFRA_TOKEN }}@github.com/${{ github.repository_owner }}/gamepulse-infra.git
           cd gamepulse-infra
           sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|g" k8s/overlays/prod/kustomization.yaml
           git config user.email "actions@github.com"
