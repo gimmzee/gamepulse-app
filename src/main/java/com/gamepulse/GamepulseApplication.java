@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 @SpringBootApplication
 @EnableScheduling
 @RestController
-public class GamepulseAppApplication {
+public class GamepulseApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(GamepulseAppApplication.class, args);
+        SpringApplication.run(GamepulseApplication.class, args);
     }
 
     @GetMapping("/health")
