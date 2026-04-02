@@ -9,8 +9,8 @@ public class SteamApiClient {
 
     private final WebClient webClient;
 
-    public SteamApiClient(WebClient.Builder builder) {
-        this.webClient = builder
+    public SteamApiClient() {
+        this.webClient = WebClient.builder()
                 .baseUrl("https://store.steampowered.com")
                 .build();
     }
