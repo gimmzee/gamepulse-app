@@ -57,6 +57,17 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ github.sha }}
+          format: table
+          exit-code: '0'
+          # 0 = 취약점 있어도 빌드 실패 안 함 (현황 파악용)
+          # 1 로 바꾸면 CRITICAL 취약점 발견 시 배포 차단
+          severity: 'CRITICAL,HIGH'
+          # LOW, MEDIUM은 너무 많아서 노이즈가 됨
+
       - name: Update image tag in infra repo
         if: github.event_name == 'push'
         run: |
