@@ -42,6 +42,10 @@ dependencies {
     // Prometheus 메트릭 노출
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+    // /swagger-ui.html 로 API 문서 자동 생성
+    // 브라우저에서 API를 직접 테스트할 수 있음
 }
 
 tasks.named('test') {
