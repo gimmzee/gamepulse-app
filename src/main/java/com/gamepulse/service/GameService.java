@@ -4,6 +4,7 @@ import com.gamepulse.domain.alert.AlertRepository;
 import com.gamepulse.domain.alert.PriceAlert;
 import com.gamepulse.domain.game.*;
 import com.gamepulse.infra.cache.GameCacheService;
+import com.gamepulse.infra.es.GameEsRepository;
 import com.gamepulse.infra.kafka.GameEventProducer;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;

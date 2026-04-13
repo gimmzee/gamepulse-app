@@ -1,7 +1,7 @@
 package com.gamepulse.service;
 
 import com.gamepulse.domain.game.Game;
-import com.gamepulse.domain.game.GameEsRepository;
+import com.gamepulse.infra.es.GameEsRepository;
 import com.gamepulse.domain.game.GameRepository;
 import com.gamepulse.infra.steam.SteamApiClient;
 import com.gamepulse.infra.kafka.GameEventProducer;

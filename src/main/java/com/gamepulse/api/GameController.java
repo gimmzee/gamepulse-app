@@ -1,7 +1,7 @@
 package com.gamepulse.api;
 
 import com.gamepulse.domain.game.Game;
-import com.gamepulse.domain.game.GameEsRepository;
+import com.gamepulse.infra.es.GameEsRepository;
 import com.gamepulse.domain.game.GamePrice;
 import com.gamepulse.service.GameService;
 import com.gamepulse.service.ItadService;

@@ -1,5 +1,6 @@
-package com.gamepulse.domain.game;
+package com.gamepulse.infra.es;
 
+import com.gamepulse.domain.game.Game;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
 import java.util.List;
 
