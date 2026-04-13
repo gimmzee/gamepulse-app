@@ -5,9 +5,11 @@ import com.gamepulse.domain.alert.PriceAlert;
 import com.gamepulse.domain.game.*;
 import com.gamepulse.infra.cache.GameCacheService;
 import com.gamepulse.infra.kafka.GameEventProducer;
+import com.gamepulse.infra.steam.SteamApiClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,30 +20,60 @@ public class GameService {
     private final AlertRepository alertRepository;
     private final GameCacheService cacheService;
     private final GameEventProducer eventProducer;
+    private final SteamApiClient steamApiClient;
 
     public GameService(GameRepository gameRepository,
                        GamePriceRepository gamePriceRepository,
                        AlertRepository alertRepository,
                        GameCacheService cacheService,
-                       GameEventProducer eventProducer) {
+                       GameEventProducer eventProducer,
+                       SteamApiClient steamApiClient) {
         this.gameRepository = gameRepository;
         this.gamePriceRepository = gamePriceRepository;
         this.alertRepository = alertRepository;
         this.cacheService = cacheService;
         this.eventProducer = eventProducer;
+        this.steamApiClient = steamApiClient;
     }
 
     // 게임 조회 — Redis 캐시 우선
     public Game getGame(Long appId) {
-        Integer cachedPrice = cacheService.getCachedPrice(appId);
-        Game game = gameRepository.findById(appId)
-                .orElseThrow(() -> new RuntimeException("Game not found: " + appId));
+        return gameRepository.findById(appId)
+                .orElseGet(() -> {
+                    // DB에 없으면 Steam API로 조회해서 자동 추가
+                    try {
+                        Map<String, Object> detail = steamApiClient.getGameDetail(appId);
+                        if (detail == null) throw new RuntimeException("Game not found: " + appId);
 
-        // 캐시에 없으면 현재 가격을 캐시에 저장
-        if (cachedPrice == null) {
-            cacheService.cachePrice(appId, game.getCurrentPrice());
-        }
-        return game;
+                        Map<String, Object> appData = (Map<String, Object>) detail.get(String.valueOf(appId));
+                        if (appData == null || !Boolean.TRUE.equals(appData.get("success")))
+                            throw new RuntimeException("Game not found: " + appId);
+
+                        Map<String, Object> data = (Map<String, Object>) appData.get("data");
+                        if (data == null) throw new RuntimeException("Game not found: " + appId);
+
+                        String title = (String) data.get("name");
+                        Integer price = 0;
+                        Map<String, Object> priceOverview = (Map<String, Object>) data.get("price_overview");
+                        if (priceOverview != null) {
+                            Object finalPrice = priceOverview.get("final");
+                            if (finalPrice instanceof Integer) price = (Integer) finalPrice / 100;
+                        }
+
+                        String thumbnail = "https://cdn.akamai.steamstatic.com/steam/apps/" + appId + "/header.jpg";
+
+                        String genre = null;
+                        List<Map<String, Object>> genres = (List<Map<String, Object>>) data.get("genres");
+                        if (genres != null && !genres.isEmpty()) genre = (String) genres.get(0).get("description");
+
+                        Game game = new Game(appId, title, price);
+                        game.setThumbnailUrl(thumbnail);
+                        game.setGenre(genre);
+                        return gameRepository.save(game);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Game not found: " + appId);
+                    }
+                });
     }
 
     // 키워드 검색
