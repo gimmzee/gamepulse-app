@@ -1,6 +1,7 @@
 package com.gamepulse.service;
 
 import com.gamepulse.domain.game.Game;
+import com.gamepulse.domain.game.GameEsRepository;
 import com.gamepulse.domain.game.GameRepository;
 import com.gamepulse.infra.steam.SteamApiClient;
 import com.gamepulse.infra.kafka.GameEventProducer;
@@ -18,15 +19,17 @@ public class PriceService {
     private final SteamApiClient steamApiClient;
     private final GameEventProducer eventProducer;
     private final GameService gameService;
+    private final GameEsRepository gameEsRepository;
 
     public PriceService(GameRepository gameRepository,
                         SteamApiClient steamApiClient,
                         GameEventProducer eventProducer,
-                        GameService gameService) {
+                        GameService gameService, GameEsRepository gameEsRepository) {
         this.gameRepository = gameRepository;
         this.steamApiClient = steamApiClient;
         this.eventProducer = eventProducer;
         this.gameService = gameService;
+        this.gameEsRepository = gameEsRepository;
     }
 
     @Scheduled(fixedRate = 3600000)
@@ -150,7 +153,11 @@ public class PriceService {
                     Game game = new Game(appId, title, price);
                     game.setThumbnailUrl(thumbnail);
                     game.setGenre(genre);
+                    // DB 저장
                     gameRepository.save(game);
+                    // ES 인덱싱 (동기화)
+                    gameEsRepository.save(game);
+                    // DB에 저장할 때 ES에도 자동으로 인덱싱
 
                     System.out.println("New game added: " + title);
 
