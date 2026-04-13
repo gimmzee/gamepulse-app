@@ -117,4 +117,19 @@ public class ItadApiClient {
                 .collectList()
                 .block();
     }
+
+    public List<Map> getDeals() {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/deals/v2")
+                        .queryParam("key", apiKey)
+                        .queryParam("country", country)
+                        .queryParam("sort", "-cut")
+                        .queryParam("limit", 20)
+                        .build())
+                .retrieve()
+                .bodyToMono(Map.class)
+                .map(response -> (List<Map>) response.get("list"))
+                .block();
+    }
 }

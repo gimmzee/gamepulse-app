@@ -6,6 +6,7 @@ import com.gamepulse.domain.game.*;
 import com.gamepulse.infra.cache.GameCacheService;
 import com.gamepulse.infra.kafka.GameEventProducer;
 import com.gamepulse.infra.steam.SteamApiClient;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -150,5 +151,18 @@ public class GameService {
                     alert.markNotified();
                     alertRepository.save(alert);
                 });
+    }
+
+    public List<Game> getPopularGames() {
+        // steam_app_id 기준으로 최근 추가된 순서 = Steam charts 순서
+        return gameRepository.findAll(
+                PageRequest.of(0, 20,
+                        Sort.by(Sort.Direction.DESC, "updatedAt"))
+        ).getContent();
+    }
+
+    public List<Map<String, Object>> getOnSaleGames() {
+        // ITAD deals API로 현재 할인 중인 게임 조회
+        return itadService.getCurrentDeals();
     }
 }

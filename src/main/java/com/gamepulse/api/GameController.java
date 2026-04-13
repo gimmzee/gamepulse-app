@@ -84,4 +84,18 @@ public class GameController {
     public List<Map> getItadHistory(@PathVariable Long appId) {
         return itadService.getGamePriceHistory(appId);
     }
+
+    // 인기 게임 (현재 플레이어 수 기준 - Steam charts 데이터 활용)
+    @GetMapping("/popular")
+    public List<Game> getPopularGames() {
+        // Steam 인기 게임 순서대로 저장된 DB 데이터 반환
+        // 매일 새벽 2시 스케줄러가 업데이트
+        return gameService.getPopularGames();
+    }
+
+    // 최근 할인 게임 (ITAD에서 현재 할인 중인 게임)
+    @GetMapping("/on-sale")
+    public List<Map<String, Object>> getOnSaleGames() {
+        return gameService.getOnSaleGames();
+    }
 }

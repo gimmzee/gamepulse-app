@@ -26,6 +26,9 @@ public class Game {
     private LocalDateTime lowestPriceAt;
     private LocalDateTime updatedAt;
 
+    @Column(length = 500)
+    private String tags;
+
     protected Game() {}
 
     public Game(Long steamAppId, String title, Integer currentPrice) {
@@ -46,6 +49,7 @@ public class Game {
     public Integer getLowestPrice() { return lowestPrice; }
     public LocalDateTime getLowestPriceAt() { return lowestPriceAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public String getTags() { return tags; }
 
     public void updatePrice(Integer newPrice) {
         this.currentPrice = newPrice;
@@ -59,4 +63,5 @@ public class Game {
     public void setDescription(String description) { this.description = description; }
     public void setGenre(String genre) { this.genre = genre; }
     public void setThumbnailUrl(String thumbnailUrl) { this.thumbnailUrl = thumbnailUrl; }
+    public void setTags(String tags) { this.tags = tags; }
 }
