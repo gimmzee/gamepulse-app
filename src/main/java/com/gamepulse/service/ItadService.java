@@ -41,4 +41,8 @@ public class ItadService {
         if (itadId == null) return List.of();
         return itadApiClient.getGamePriceHistory(itadId);
     }
+
+    public List<Map> searchGames(String keyword) {
+        return itadApiClient.searchGames(keyword);
+    }
 }

@@ -24,8 +24,16 @@ public class GameController {
     }
 
     @GetMapping("/search")
-    public List<Game> search(@RequestParam String q) {
-        return gameService.search(q);
+    public List<?> search(@RequestParam String q) {
+        // DB에서 먼저 검색
+        List<Game> dbResults = gameService.search(q);
+
+        if (!dbResults.isEmpty()) {
+            return dbResults;
+        }
+
+        // DB에 없으면 ITAD에서 검색
+        return itadService.searchGames(q);
     }
 
     @GetMapping("/{appId}")
