@@ -80,7 +80,9 @@ jobs:
           IMAGE_TAG="sha-$(echo ${{ github.sha }} | cut -c1-7)"
           git clone https://x-access-token:${{ secrets.INFRA_TOKEN }}@github.com/${{ github.repository_owner }}/gamepulse-infra.git
           cd gamepulse-infra
-          sed -i "s|newTag:.*|newTag: ${IMAGE_TAG}|g" k8s/overlays/prod/kustomization.yaml
+          sed -i "/gamepulse-app$/{n;s|newTag:.*|newTag: ${IMAGE_TAG}|}" k8s/overlays/prod/kustomization.yaml
+          # gamepulse-app 줄 다음 줄의 newTag만 변경
+          # gamepulse-frontend 태그는 건드리지 않음
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
           git add .
