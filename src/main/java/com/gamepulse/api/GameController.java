@@ -4,6 +4,7 @@ import com.gamepulse.domain.game.Game;
 import com.gamepulse.domain.game.GamePrice;
 import com.gamepulse.service.GameService;
 import com.gamepulse.service.ItadService;
+import com.gamepulse.service.PriceService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -14,11 +15,12 @@ public class GameController {
 
     private final GameService gameService;
     private final ItadService itadService;
+    private final PriceService priceService;
 
-
-    public GameController(GameService gameService, ItadService itadService) {
+    public GameController(GameService gameService, ItadService itadService, PriceService priceService) {
         this.gameService = gameService;
         this.itadService = itadService;
+        this.priceService = priceService;
     }
 
     @GetMapping("/search")
@@ -61,5 +63,12 @@ public class GameController {
     @GetMapping("/{appId}/price-overview")
     public Map getPriceOverview(@PathVariable Long appId) {
         return itadService.getPriceOverview(appId);
+    }
+
+    // 관리자용: 즉시 인기 게임 수집 실행
+    @PostMapping("/admin/collect-popular")
+    public String collectPopularGames() {
+        priceService.collectPopularGames();
+        return "Popular games collection triggered";
     }
 }
