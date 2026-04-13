@@ -47,13 +47,7 @@ dependencies {
     // /swagger-ui.html 로 API 문서 자동 생성
     // 브라우저에서 API를 직접 테스트할 수 있음
 
-    // Elasticsearch 버전 고정
-    implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch') {
-        exclude group: 'co.elastic.clients', module: 'elasticsearch-java'
-    }
-    implementation 'co.elastic.clients:elasticsearch-java:8.11.0'
-    // ES 서버 버전(8.11.0)과 클라이언트 버전을 일치시킴
-    // Spring Boot가 자동으로 9.x를 올리는 것을 막음
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 }
 
 tasks.named('test') {
