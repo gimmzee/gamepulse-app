@@ -15,8 +15,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "http://localhost:3000",
                         // 로컬 개발 환경
-                        "https://gamepulse.vbnmzxc.shop"
+                        "https://gamepulse.vbnmzxc.shop",
                         // 프로덕션 프론트엔드 도메인
+                        "http://gamepulse.local",          // 추가
+                        "https://gamepulse.local"          // HTTPS도 추가
                 )
 
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
