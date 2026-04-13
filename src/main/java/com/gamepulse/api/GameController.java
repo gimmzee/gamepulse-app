@@ -1,6 +1,7 @@
 package com.gamepulse.api;
 
 import com.gamepulse.domain.game.Game;
+import com.gamepulse.domain.game.GameEsRepository;
 import com.gamepulse.domain.game.GamePrice;
 import com.gamepulse.service.GameService;
 import com.gamepulse.service.ItadService;
@@ -16,11 +17,21 @@ public class GameController {
     private final GameService gameService;
     private final ItadService itadService;
     private final PriceService priceService;
+    private final GameEsRepository gameEsRepository;
 
-    public GameController(GameService gameService, ItadService itadService, PriceService priceService) {
+    public GameController(GameService gameService, ItadService itadService, PriceService priceService, GameEsRepository gameEsRepository) {
         this.gameService = gameService;
         this.itadService = itadService;
         this.priceService = priceService;
+        this.gameEsRepository = gameEsRepository;
+    }
+
+    // 기존 DB 게임을 ES에 일괄 인덱싱
+    @PostMapping("/admin/reindex")
+    public String reindex() {
+        List<Game> allGames = gameService.getAllGames();
+        gameEsRepository.saveAll(allGames);
+        return "Reindexed " + allGames.size() + " games to Elasticsearch";
     }
 
     @GetMapping("/search")
