@@ -9,10 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "games")
-@Document(indexName = "games")
-// PostgreSQL과 ES 동시에 사용
-// @Entity → PostgreSQL 저장
-// @Document → Elasticsearch 인덱싱
+// ES는 GameDocument가 담당
 public class Game {
 
     @Id
@@ -24,8 +21,6 @@ public class Game {
     @Column(length = 2000)
     private String description;
 
-    @Field(type = FieldType.Keyword)
-    // Keyword = 정확한 매칭용. "Action,RPG" 전체를 하나의 값으로 인덱싱
     private String genre;
     private String thumbnailUrl;
 
@@ -37,10 +32,7 @@ public class Game {
     private LocalDateTime updatedAt;
 
     @Column(length = 500)
-    @Field(type = FieldType.Text, analyzer = "standard")
     private String tags;
-    // "Open World,RPG,Dark Fantasy" 형식
-    // Text = 분석 후 인덱싱. "Open", "World", "RPG" 각각 인덱싱됨
 
     protected Game() {}
 

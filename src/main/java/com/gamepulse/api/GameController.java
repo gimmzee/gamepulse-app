@@ -1,6 +1,7 @@
 package com.gamepulse.api;
 
 import com.gamepulse.domain.game.Game;
+import com.gamepulse.infra.es.GameDocument;
 import com.gamepulse.infra.es.GameEsRepository;
 import com.gamepulse.domain.game.GamePrice;
 import com.gamepulse.service.GameService;
@@ -9,6 +10,7 @@ import com.gamepulse.service.PriceService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/games")
@@ -30,8 +32,11 @@ public class GameController {
     @PostMapping("/admin/reindex")
     public String reindex() {
         List<Game> allGames = gameService.getAllGames();
-        gameEsRepository.saveAll(allGames);
-        return "Reindexed " + allGames.size() + " games to Elasticsearch";
+        List<GameDocument> docs = allGames.stream()
+                .map(GameDocument::from)
+                .collect(Collectors.toList());
+        gameEsRepository.saveAll(docs);
+        return "Reindexed " + docs.size() + " games to Elasticsearch";
     }
 
     @GetMapping("/search")
