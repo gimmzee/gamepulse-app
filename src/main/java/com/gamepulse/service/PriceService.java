@@ -1,6 +1,7 @@
 package com.gamepulse.service;
 
 import com.gamepulse.domain.game.Game;
+import com.gamepulse.infra.es.GameDocument;
 import com.gamepulse.infra.es.GameEsRepository;
 import com.gamepulse.domain.game.GameRepository;
 import com.gamepulse.infra.steam.SteamApiClient;
@@ -156,7 +157,7 @@ public class PriceService {
                     // DB 저장
                     gameRepository.save(game);
                     // ES 인덱싱 (동기화)
-                    gameEsRepository.save(game);
+                    gameEsRepository.save(GameDocument.from(game));
                     // DB에 저장할 때 ES에도 자동으로 인덱싱
 
                     System.out.println("New game added: " + title);
