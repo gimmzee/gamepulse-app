@@ -71,4 +71,9 @@ public class GameController {
         priceService.collectPopularGames();
         return "Popular games collection triggered";
     }
+
+    @GetMapping("/{appId}/itad-history")
+    public List<Map> getItadHistory(@PathVariable Long appId) {
+        return itadService.getGamePriceHistory(appId);
+    }
 }

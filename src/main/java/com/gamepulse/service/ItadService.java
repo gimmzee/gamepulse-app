@@ -35,4 +35,10 @@ public class ItadService {
 
         return itadApiClient.getPriceOverview(List.of(itadId));
     }
+
+    public List<Map> getGamePriceHistory(Long steamAppId) {
+        String itadId = itadApiClient.lookupGameId(steamAppId);
+        if (itadId == null) return List.of();
+        return itadApiClient.getGamePriceHistory(itadId);
+    }
 }

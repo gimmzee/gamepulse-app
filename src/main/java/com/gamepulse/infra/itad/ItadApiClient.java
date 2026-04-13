@@ -103,4 +103,18 @@ public class ItadApiClient {
                 .collectList()
                 .block();
     }
+    // 플랫폼별 가격 이력 (기본 최근 3개월)
+    public List<Map> getGamePriceHistory(String itadId) {
+        return webClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/games/history/v2")
+                        .queryParam("id", itadId)
+                        .queryParam("key", apiKey)
+                        .queryParam("country", country)
+                        .build())
+                .retrieve()
+                .bodyToFlux(Map.class)
+                .collectList()
+                .block();
+    }
 }
