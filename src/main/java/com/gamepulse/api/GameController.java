@@ -172,16 +172,4 @@ public class GameController {
         }
         return "Updated " + updated + " games";
     }
-
-    // 인기 게임 (Steam charts 기준 최근 수집된 게임)
-    @GetMapping("/popular")
-    public List<Game> getPopularGames() {
-        return gameService.getPopularGames();
-    }
-
-    // 최대 할인 게임 (ITAD deals API)
-    @GetMapping("/on-sale")
-    public List<Map<String, Object>> getOnSaleGames() {
-        return itadService.getCurrentDeals();
-    }
 }
