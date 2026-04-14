@@ -12,6 +12,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class PriceService {
@@ -142,18 +144,36 @@ public class PriceService {
                             "https://cdn.akamai.steamstatic.com/steam/apps/"
                                     + appId + "/header.jpg";
 
-                    // 장르
-                    String genre = null;
+                    // 장르 추출 (기존 코드)
+                    String genreStr = null;
                     List<Map<String, Object>> genres =
                             (List<Map<String, Object>>) data.get("genres");
-                    if (genres != null && !genres.isEmpty()) {
-                        genre = (String) genres.get(0).get("description");
+                    if (genres != null) {
+                        genreStr = genres.stream()
+                                .map(g -> (String) g.get("description"))
+                                .collect(Collectors.joining(","));
                     }
+
+                    // tags 추출 (추가)
+                    String tagsStr = null;
+                    List<Map<String, Object>> categories =
+                            (List<Map<String, Object>>) data.get("categories");
+                    if (categories != null) {
+                        tagsStr = categories.stream()
+                                .map(c -> (String) c.get("description"))
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.joining(","));
+                    }
+
+                    // description 추출 (추가)
+                    String description = (String) data.get("short_description");
 
                     // DB 저장
                     Game game = new Game(appId, title, price);
                     game.setThumbnailUrl(thumbnail);
-                    game.setGenre(genre);
+                    game.setGenre(genreStr);
+                    game.setTags(tagsStr);
+                    game.setDescription(description);
                     // DB 저장
                     gameRepository.save(game);
                     // ES 인덱싱 (동기화)
