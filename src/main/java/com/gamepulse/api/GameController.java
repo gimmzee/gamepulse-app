@@ -164,7 +164,7 @@ public class GameController {
                 gameEsRepository.save(GameDocument.from(game));
                 updated++;
 
-                Thread.sleep(200);
+                Thread.sleep(1000);
             } catch (Exception e) {
                 System.err.println("Failed to update " +
                         game.getSteamAppId() + ": " + e.getMessage());
