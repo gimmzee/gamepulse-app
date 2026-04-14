@@ -3,6 +3,7 @@ package com.gamepulse.service;
 import com.gamepulse.infra.itad.ItadApiClient;
 import org.springframework.stereotype.Service;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ItadService {
@@ -47,29 +48,38 @@ public class ItadService {
     }
 
     public List<Map<String, Object>> getCurrentDeals() {
-        // ITAD /deals/v2 API 호출
-        // country=KR, sort=-cut (할인율 높은 순)
         List<Map> deals = itadApiClient.getDeals();
-        // 응답을 프론트가 쓰기 쉬운 형태로 변환
         return deals.stream()
-                .limit(20)
                 .map(deal -> {
                     Map<String, Object> result = new HashMap<>();
                     result.put("title", deal.get("title"));
-                    result.put("assets", deal.get("assets"));
 
+                    // 썸네일
+                    Map assets = (Map) deal.get("assets");
+                    if (assets != null) {
+                        result.put("thumbnail", assets.get("banner300"));
+                    }
+
+                    // 가격 정보
                     Map dealInfo = (Map) deal.get("deal");
                     if (dealInfo != null) {
                         Map price = (Map) dealInfo.get("price");
                         Map regular = (Map) dealInfo.get("regular");
-                        result.put("currentPrice", price != null ? price.get("amount") : 0);
-                        result.put("regularPrice", regular != null ? regular.get("amount") : 0);
+                        Map historyLow = (Map) dealInfo.get("historyLow");
+
+                        result.put("currentPrice",
+                                price != null ? price.get("amount") : 0);
+                        result.put("regularPrice",
+                                regular != null ? regular.get("amount") : 0);
                         result.put("cut", dealInfo.get("cut"));
-                        result.put("shopName", ((Map)dealInfo.get("shop")).get("name"));
+                        result.put("shopName",
+                                ((Map) dealInfo.get("shop")).get("name"));
                         result.put("url", dealInfo.get("url"));
+                        result.put("historyLow",
+                                historyLow != null ? historyLow.get("amount") : null);
                     }
                     return result;
                 })
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 }

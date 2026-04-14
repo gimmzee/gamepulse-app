@@ -119,17 +119,26 @@ public class ItadApiClient {
     }
 
     public List<Map> getDeals() {
-        return webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/deals/v2")
-                        .queryParam("key", apiKey)
-                        .queryParam("country", country)
-                        .queryParam("sort", "-cut")
-                        .queryParam("limit", 20)
-                        .build())
-                .retrieve()
-                .bodyToMono(Map.class)
-                .map(response -> (List<Map>) response.get("list"))
-                .block();
+        try {
+            Map response = webClient.get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/deals/v2")
+                            .queryParam("key", apiKey)
+                            .queryParam("country", country)
+                            .queryParam("sort", "-cut")
+                            // 할인율 높은 순 정렬
+                            .queryParam("limit", 20)
+                            .build())
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .block();
+
+            if (response == null) return List.of();
+            List<Map> list = (List<Map>) response.get("list");
+            return list != null ? list : List.of();
+        } catch (Exception e) {
+            System.err.println("Failed to get deals: " + e.getMessage());
+            return List.of();
+        }
     }
 }
