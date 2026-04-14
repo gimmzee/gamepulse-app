@@ -178,7 +178,7 @@ public class GameController {
         return "Updated " + updated + " games";
     }
 
-    @GetMapping("/stats")
+    @GetMapping("/admin/stats")
     public Map<String, Object> getStats() {
         Map<String, Object> stats = new HashMap<>();
 
