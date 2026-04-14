@@ -18,7 +18,8 @@ public class WebConfig implements WebMvcConfigurer {
                         "https://gamepulse.vbnmzxc.shop",
                         // 프로덕션 프론트엔드 도메인
                         "http://gamepulse.local",          // 추가
-                        "https://gamepulse.local"          // HTTPS도 추가
+                        "https://gamepulse.local",         // HTTPS도 추가
+                        "https://gamepulselab.vbnmzxc.shop"
                 )
 
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
