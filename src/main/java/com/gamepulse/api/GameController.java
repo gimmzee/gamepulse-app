@@ -1,5 +1,6 @@
 package com.gamepulse.api;
 
+import com.gamepulse.domain.alert.AlertRepository;
 import com.gamepulse.domain.game.Game;
 import com.gamepulse.domain.game.GameRepository;
 import com.gamepulse.infra.es.GameDocument;
@@ -10,6 +11,8 @@ import com.gamepulse.service.GameService;
 import com.gamepulse.service.ItadService;
 import com.gamepulse.service.PriceService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -25,14 +28,16 @@ public class GameController {
     private final GameEsRepository gameEsRepository;
     private final SteamApiClient steamApiClient;
     private final GameRepository gameRepository;
+    private final AlertRepository alertRepository;
 
-    public GameController(GameService gameService, ItadService itadService, PriceService priceService, GameEsRepository gameEsRepository, SteamApiClient steamApiClient, GameRepository gameRepository) {
+    public GameController(GameService gameService, ItadService itadService, PriceService priceService, GameEsRepository gameEsRepository, SteamApiClient steamApiClient, GameRepository gameRepository, AlertRepository alertRepository) {
         this.gameService = gameService;
         this.itadService = itadService;
         this.priceService = priceService;
         this.gameEsRepository = gameEsRepository;
         this.steamApiClient = steamApiClient;
         this.gameRepository = gameRepository;
+        this.alertRepository = alertRepository;
     }
 
     // 기존 DB 게임을 ES에 일괄 인덱싱
@@ -171,5 +176,24 @@ public class GameController {
             }
         }
         return "Updated " + updated + " games";
+    }
+
+    @GetMapping("/stats")
+    public Map<String, Object> getStats() {
+        Map<String, Object> stats = new HashMap<>();
+
+        // 추적 중인 게임 수
+        stats.put("trackedGames", gameRepository.count());
+
+        // 플랫폼 수 (Steam, Epic, GOG, Humble 등 ITAD 기준 고정)
+        stats.put("platforms", 30);
+
+        // 오늘 할인 중인 게임 수 (ITAD deals)
+        stats.put("todayDeals", itadService.getCurrentDeals().size());
+
+        // 등록된 알림 수
+        stats.put("alerts", alertRepository.count());
+
+        return stats;
     }
 }
