@@ -1,15 +1,18 @@
 package com.gamepulse.api;
 
 import com.gamepulse.domain.game.Game;
+import com.gamepulse.domain.game.GameRepository;
 import com.gamepulse.infra.es.GameDocument;
 import com.gamepulse.infra.es.GameEsRepository;
 import com.gamepulse.domain.game.GamePrice;
+import com.gamepulse.infra.steam.SteamApiClient;
 import com.gamepulse.service.GameService;
 import com.gamepulse.service.ItadService;
 import com.gamepulse.service.PriceService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RestController
@@ -20,12 +23,16 @@ public class GameController {
     private final ItadService itadService;
     private final PriceService priceService;
     private final GameEsRepository gameEsRepository;
+    private final SteamApiClient steamApiClient;
+    private final GameRepository gameRepository;
 
-    public GameController(GameService gameService, ItadService itadService, PriceService priceService, GameEsRepository gameEsRepository) {
+    public GameController(GameService gameService, ItadService itadService, PriceService priceService, GameEsRepository gameEsRepository, SteamApiClient steamApiClient, GameRepository gameRepository) {
         this.gameService = gameService;
         this.itadService = itadService;
         this.priceService = priceService;
         this.gameEsRepository = gameEsRepository;
+        this.steamApiClient = steamApiClient;
+        this.gameRepository = gameRepository;
     }
 
     // 기존 DB 게임을 ES에 일괄 인덱싱
@@ -113,5 +120,56 @@ public class GameController {
     @GetMapping("/on-sale")
     public List<Map<String, Object>> getOnSaleGames() {
         return gameService.getOnSaleGames();
+    }
+
+    @PostMapping("/admin/update-game-details")
+    public String updateGameDetails() {
+        List<Game> allGames = gameService.getAllGames();
+        int updated = 0;
+        for (Game game : allGames) {
+            try {
+                Map<String, Object> detail =
+                        steamApiClient.getGameDetail(game.getSteamAppId());
+                if (detail == null) continue;
+
+                Map<String, Object> appData =
+                        (Map<String, Object>) detail.get(
+                                String.valueOf(game.getSteamAppId()));
+                if (appData == null ||
+                        !Boolean.TRUE.equals(appData.get("success"))) continue;
+
+                Map<String, Object> data =
+                        (Map<String, Object>) appData.get("data");
+                if (data == null) continue;
+
+                // description 업데이트
+                String description =
+                        (String) data.get("short_description");
+                if (description != null) {
+                    game.setDescription(description);
+                }
+
+                // tags 업데이트
+                List<Map<String, Object>> categories =
+                        (List<Map<String, Object>>) data.get("categories");
+                if (categories != null) {
+                    String tagsStr = categories.stream()
+                            .map(c -> (String) c.get("description"))
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.joining(","));
+                    game.setTags(tagsStr);
+                }
+
+                gameRepository.save(game);
+                gameEsRepository.save(GameDocument.from(game));
+                updated++;
+
+                Thread.sleep(200);
+            } catch (Exception e) {
+                System.err.println("Failed to update " +
+                        game.getSteamAppId() + ": " + e.getMessage());
+            }
+        }
+        return "Updated " + updated + " games";
     }
 }
