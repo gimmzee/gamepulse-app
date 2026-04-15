@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop ]
   pull_request:
     branches: [ main ]
 
@@ -60,31 +60,11 @@ jobs:
       - name: Set short SHA
         id: short_sha
         run: echo "sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
-          # github.sha 전체 40자리를 앞 7자리로 자름
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${{ steps.short_sha.outputs.sha }}
-          # sha-2e3de22 형태로 실제 push된 태그와 일치
           format: table
           exit-code: '0'
-          # 0 = 취약점 있어도 빌드 실패 안 함 (현황 파악용)
-          # 1 로 바꾸면 CRITICAL 취약점 발견 시 배포 차단
           severity: 'CRITICAL,HIGH'
-          # LOW, MEDIUM은 너무 많아서 노이즈가 됨
-
-      - name: Update image tag in infra repo
-        if: github.event_name == 'push'
-        run: |
-          IMAGE_TAG="sha-$(echo ${{ github.sha }} | cut -c1-7)"
-          git clone https://x-access-token:${{ secrets.INFRA_TOKEN }}@github.com/${{ github.repository_owner }}/gamepulse-infra.git
-          cd gamepulse-infra
-          sed -i "/gamepulse-app$/{n;s|newTag:.*|newTag: ${IMAGE_TAG}|}" k8s/overlays/prod/kustomization.yaml
-          # gamepulse-app 줄 다음 줄의 newTag만 변경
-          # gamepulse-frontend 태그는 건드리지 않음
-          git config user.email "actions@github.com"
-          git config user.name "GitHub Actions"
-          git add .
-          git diff --staged --quiet || git commit -m "chore: update image tag to ${IMAGE_TAG}"
-          git push
